@@ -40,7 +40,7 @@ class DataManager:
         if student_id not in self.data_store.df['student_id'].values:
             return False, f"学号 {student_id} 不存在"
 
-        allowed_fields = ['name', 'gender', 'grade', 'class', 'height', 'measure_date']
+        allowed_fields = ['name', 'gender', 'grade', 'class_num', 'height', 'measure_date']
 
         for key in kwargs:
             if key not in allowed_fields:
@@ -78,9 +78,12 @@ class DataManager:
         return success_count, len(failed_ids), failed_ids
 
     def backup_data(self, backup_name: Optional[str] = None) -> str:
-        """备份数据"""
+        """备份数据 - 自动创建目录"""
         if backup_name is None:
             backup_name = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+
+        # 确保备份目录存在
+        os.makedirs(self.backup_dir, exist_ok=True)
 
         backup_path = os.path.join(self.backup_dir, backup_name)
         self.data_store.df.to_csv(backup_path, index=False)
@@ -93,22 +96,44 @@ class DataManager:
         return sorted([f for f in os.listdir(self.backup_dir) if f.endswith('.csv')])
 
     def restore_from_backup(self, backup_name: str) -> Tuple[bool, str]:
-        """从备份恢复"""
+        """从备份恢复 - 验证备份文件完整性"""
         backup_path = os.path.join(self.backup_dir, backup_name)
 
         if not os.path.exists(backup_path):
             return False, f"备份文件 {backup_name} 不存在"
 
         try:
+            # 尝试读取并验证备份文件
+            df = pd.read_csv(backup_path)
+
+            # 支持两种列名: class 或 class_num
+            if 'class' in df.columns and 'class_num' not in df.columns:
+                df = df.rename(columns={'class': 'class_num'})
+            
+            # 验证必要列
+            required_columns = ['student_id', 'name', 'gender', 'grade', 'class_num', 'height', 'measure_date']
+            missing_columns = [col for col in required_columns if col not in df.columns]
+            if missing_columns:
+                return False, f"备份文件缺少必要列: {missing_columns}"
+
+            # 允许恢复空文件（用于清空数据场景）
+
             # 先备份当前数据
             self.backup_data(f"auto_backup_before_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
 
-            # 恢复数据
-            df = pd.read_csv(backup_path)
-            self.data_store.df = df
+            # 恢复数据 - 确保student_id为字符串类型（避免int/str匹配问题）
+            df['student_id'] = df['student_id'].astype(str)
+            self.data_store.df = df.copy()
             self.data_store.save_data()
 
-            return True, f"已从备份 {backup_name} 恢复数据"
+            return True, f"已从备份 {backup_name} 恢复数据，共 {len(df)} 条记录"
+        except pd.errors.EmptyDataError:
+            # 空文件也是有效的备份（表示清空数据）
+            self.backup_data(f"auto_backup_before_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
+            self.data_store.clear_data()
+            return True, "已恢复为空白数据集"
+        except pd.errors.ParserError:
+            return False, "备份文件格式错误"
         except Exception as e:
             return False, f"恢复失败: {str(e)}"
 
@@ -142,12 +167,15 @@ class DataManager:
         gender_dist = df['gender'].value_counts().to_dict()
         grade_dist = df['grade'].value_counts().to_dict()
 
+        # 检查列名并使用正确的列
+        class_col = 'class_num' if 'class_num' in df.columns else 'class'
+        
         return {
             'total_students': len(df),
             'total_records': len(df),
             'gender_distribution': gender_dist,
             'grade_distribution': grade_dist,
-            'class_count': df.groupby(['grade', 'class']).size().shape[0]
+            'class_count': df.groupby(['grade', class_col]).size().shape[0]
         }
 
     def clear_all_data(self, confirm: bool = False) -> Tuple[bool, str]:
@@ -169,8 +197,9 @@ class DataManager:
         if df.empty:
             return True, []
 
-        # 检查必填字段
-        for col in ['student_id', 'name', 'gender', 'grade', 'class', 'height']:
+        # 检查必填字段 - 支持两种列名
+        class_col = 'class_num' if 'class_num' in df.columns else 'class'
+        for col in ['student_id', 'name', 'gender', 'grade', class_col, 'height']:
             if col not in df.columns:
                 issues.append(f"缺少必要列: {col}")
             else:
