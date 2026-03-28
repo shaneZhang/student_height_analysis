@@ -24,20 +24,25 @@ class HeightStatistics:
             return {}
 
         heights = self.df['height']
+        
+        valid_heights = heights[heights.notna() & np.isfinite(heights)]
+        
+        if valid_heights.empty:
+            return {}
 
         stats_dict = {
-            'count': len(heights),
-            'mean': round(heights.mean(), 2),
-            'median': round(heights.median(), 2),
-            'mode': round(heights.mode().iloc[0], 2) if not heights.mode().empty else None,
-            'std': round(heights.std(), 2),
-            'var': round(heights.var(), 2),
-            'min': round(heights.min(), 2),
-            'max': round(heights.max(), 2),
-            'range': round(heights.max() - heights.min(), 2),
-            'q1': round(heights.quantile(0.25), 2),
-            'q3': round(heights.quantile(0.75), 2),
-            'iqr': round(heights.quantile(0.75) - heights.quantile(0.25), 2)
+            'count': len(valid_heights),
+            'mean': round(valid_heights.mean(), 2),
+            'median': round(valid_heights.median(), 2),
+            'mode': round(valid_heights.mode().iloc[0], 2) if not valid_heights.mode().empty else None,
+            'std': round(valid_heights.std(), 2),
+            'var': round(valid_heights.var(), 2),
+            'min': round(valid_heights.min(), 2),
+            'max': round(valid_heights.max(), 2),
+            'range': round(valid_heights.max() - valid_heights.min(), 2),
+            'q1': round(valid_heights.quantile(0.25), 2),
+            'q3': round(valid_heights.quantile(0.75), 2),
+            'iqr': round(valid_heights.quantile(0.75) - valid_heights.quantile(0.25), 2)
         }
 
         return stats_dict

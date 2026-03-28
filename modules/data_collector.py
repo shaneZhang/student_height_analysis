@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from datetime import datetime
 from typing import Tuple, List, Optional
 from .data_model import Student, DataStore
@@ -34,11 +35,19 @@ class DataValidator:
 
         if not isinstance(student.height, (int, float)):
             errors.append("身高必须是数字")
+        elif not np.isfinite(student.height):
+            errors.append("身高必须是有效数字（不能是Infinity或NaN）")
         elif student.height < cls.MIN_HEIGHT or student.height > cls.MAX_HEIGHT:
             errors.append(f"身高必须在{cls.MIN_HEIGHT}cm到{cls.MAX_HEIGHT}cm之间")
 
         try:
-            datetime.strptime(student.measure_date, '%Y-%m-%d')
+            measure_date = datetime.strptime(student.measure_date, '%Y-%m-%d')
+            today = datetime.now()
+            if measure_date.date() > today.date():
+                errors.append("测量日期不能是未来日期")
+            min_valid_date = datetime(2000, 1, 1)
+            if measure_date < min_valid_date:
+                errors.append("测量日期不能早于2000年1月1日")
         except ValueError:
             errors.append("测量日期格式错误，应为YYYY-MM-DD")
 
@@ -57,6 +66,9 @@ class DataValidator:
                 errors.append(f"缺少必要列: {col}")
                 return False, errors, pd.DataFrame()
 
+        today = datetime.now().date()
+        min_valid_date = datetime(2000, 1, 1)
+
         for idx, row in df.iterrows():
             row_errors = []
 
@@ -74,10 +86,21 @@ class DataValidator:
 
             try:
                 height = float(row['height'])
-                if height < cls.MIN_HEIGHT or height > cls.MAX_HEIGHT:
+                if not np.isfinite(height):
+                    row_errors.append(f"第{idx+1}行: 身高必须是有效数字（不能是Infinity或NaN）")
+                elif height < cls.MIN_HEIGHT or height > cls.MAX_HEIGHT:
                     row_errors.append(f"第{idx+1}行: 身高必须在{cls.MIN_HEIGHT}cm到{cls.MAX_HEIGHT}cm之间")
             except (ValueError, TypeError):
                 row_errors.append(f"第{idx+1}行: 身高必须是有效数字")
+
+            try:
+                measure_date = datetime.strptime(str(row['measure_date']), '%Y-%m-%d')
+                if measure_date.date() > today:
+                    row_errors.append(f"第{idx+1}行: 测量日期不能是未来日期")
+                if measure_date < min_valid_date:
+                    row_errors.append(f"第{idx+1}行: 测量日期不能早于2000年1月1日")
+            except ValueError:
+                row_errors.append(f"第{idx+1}行: 测量日期格式错误，应为YYYY-MM-DD")
 
             if row_errors:
                 errors.extend(row_errors)
