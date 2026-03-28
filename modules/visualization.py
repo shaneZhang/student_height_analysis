@@ -4,10 +4,47 @@ import pandas as pd
 import numpy as np
 from typing import Optional, List, Tuple
 import os
+import platform
 
-# 设置中文字体
-plt.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans']
-plt.rcParams['axes.unicode_minus'] = False
+# 设置中文字体 - 根据操作系统选择合适字体
+def setup_chinese_font():
+    """配置中文字体"""
+    import matplotlib.font_manager as fm
+
+    system = platform.system()
+
+    # 尝试设置中文字体
+    if system == 'Darwin':  # macOS
+        # 尝试使用系统自带的中文字体
+        chinese_fonts = ['STHeiti', 'Heiti TC', 'PingFang SC', 'Arial Unicode MS']
+    elif system == 'Windows':
+        chinese_fonts = ['SimHei', 'Microsoft YaHei', 'Arial Unicode MS']
+    else:  # Linux
+        chinese_fonts = ['WenQuanYi Micro Hei', 'SimHei', 'DejaVu Sans']
+
+    # 检查字体是否可用
+    available_fonts = []
+    for font in chinese_fonts:
+        try:
+            # 尝试查找字体
+            font_path = fm.findfont(fm.FontProperties(family=font))
+            if font_path and 'DejaVuSans' not in font_path:
+                available_fonts.append(font)
+        except:
+            pass
+
+    if available_fonts:
+        plt.rcParams['font.sans-serif'] = available_fonts + ['DejaVu Sans']
+        print(f"已设置中文字体: {available_fonts[0]}")
+    else:
+        # 如果没有找到中文字体，使用备用方案
+        plt.rcParams['font.sans-serif'] = ['DejaVu Sans']
+        print("警告: 未找到中文字体，图表中的中文可能显示为方框")
+
+    plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
+
+# 初始化字体设置
+setup_chinese_font()
 
 
 class HeightVisualizer:
