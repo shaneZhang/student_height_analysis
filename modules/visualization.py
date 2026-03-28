@@ -274,8 +274,11 @@ class HeightVisualizer:
 
         fig, ax = plt.subplots(figsize=(12, 6))
 
-        class_stats = df_filtered.groupby(['grade', 'class'])['height'].mean().reset_index()
-        class_stats['label'] = class_stats['grade'] + class_stats['class'].astype(str) + '班'
+        # 检查列名并使用正确的列
+        class_col = 'class_num' if 'class_num' in df_filtered.columns else 'class'
+        
+        class_stats = df_filtered.groupby(['grade', class_col])['height'].mean().reset_index()
+        class_stats['label'] = class_stats['grade'] + class_stats[class_col].astype(str) + '班'
 
         bars = ax.bar(range(len(class_stats)), class_stats['height'], color='steelblue', alpha=0.7)
 

@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from datetime import datetime
 from typing import Tuple, List, Optional
 from .data_model import Student, DataStore
@@ -34,11 +35,19 @@ class DataValidator:
 
         if not isinstance(student.height, (int, float)):
             errors.append("身高必须是数字")
+        elif pd.isna(student.height) or np.isinf(student.height):
+            errors.append("身高不能是空值或无穷大值")
         elif student.height < cls.MIN_HEIGHT or student.height > cls.MAX_HEIGHT:
             errors.append(f"身高必须在{cls.MIN_HEIGHT}cm到{cls.MAX_HEIGHT}cm之间")
 
         try:
-            datetime.strptime(student.measure_date, '%Y-%m-%d')
+            measure_date = datetime.strptime(student.measure_date, '%Y-%m-%d')
+            # 检查未来日期
+            if measure_date > datetime.now():
+                errors.append("测量日期不能是未来日期")
+            # 检查极早日期（早于2000年）
+            if measure_date < datetime(2000, 1, 1):
+                errors.append("测量日期不能早于2000年")
         except ValueError:
             errors.append("测量日期格式错误，应为YYYY-MM-DD")
 
@@ -50,7 +59,12 @@ class DataValidator:
         errors = []
         valid_rows = []
 
-        required_columns = ['student_id', 'name', 'gender', 'grade', 'class', 'height', 'measure_date']
+        # 支持两种列名: class 或 class_num
+        df = df.copy()
+        if 'class' in df.columns and 'class_num' not in df.columns:
+            df = df.rename(columns={'class': 'class_num'})
+        
+        required_columns = ['student_id', 'name', 'gender', 'grade', 'class_num', 'height', 'measure_date']
 
         for col in required_columns:
             if col not in df.columns:
@@ -159,13 +173,14 @@ class DataCollector:
         return success, message
 
     def get_import_template(self) -> pd.DataFrame:
-        """获取导入模板"""
+        """获取导入模板 - 包含两种列名以保持向后兼容"""
         template_data = {
             'student_id': ['2023010101', '2023010102'],
             'name': ['张三', '李四'],
             'gender': ['男', '女'],
             'grade': ['高一', '高二'],
-            'class': [1, 2],
+            'class': [1, 2],  # 旧格式，向后兼容
+            'class_num': [1, 2],  # 新格式，推荐使用
             'height': [175.5, 162.0],
             'measure_date': ['2024-03-15', '2024-03-15']
         }

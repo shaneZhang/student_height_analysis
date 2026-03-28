@@ -1,0 +1,62 @@
+================================================================================
+学生身高分析系统 - 全面测试Bug报告
+================================================================================
+
+测试时间: 2026-03-28 14:26:25
+测试总数: 99
+通过测试: 92
+失败测试: 7
+Bug数量: 7
+
+================================================================================
+发现的Bug详情
+================================================================================
+
+【Bug #2】
+  严重程度: HIGH
+  模块: statistics
+  函数: basic_statistics
+  问题描述: 基础统计失败
+  详细信息: 'Series' object has no attribute 'isfinite'
+
+【Bug #3】
+  严重程度: HIGH
+  模块: statistics
+  函数: generate_full_report
+  问题描述: 生成完整报告失败
+  详细信息: 'Series' object has no attribute 'isfinite'
+
+【Bug #5】
+  严重程度: HIGH
+  模块: data_manager
+  函数: restore_from_backup
+  问题描述: 从备份恢复失败
+
+【Bug #6】
+  严重程度: HIGH
+  模块: data_manager
+  函数: get_statistics_summary
+  问题描述: 获取统计摘要失败
+  详细信息: 'class'
+
+【Bug #7】
+  严重程度: HIGH
+  模块: data_file
+  函数: HeightStatistics
+  问题描述: test_data.csv分析失败
+  详细信息: 'Series' object has no attribute 'isfinite'
+
+【Bug #1】
+  严重程度: MEDIUM
+  模块: data_collector
+  函数: DataCollector.get_import_template
+  问题描述: 获取导入模板失败
+
+【Bug #4】
+  严重程度: MEDIUM
+  模块: statistics
+  函数: export_report_to_text
+  问题描述: 导出文本报告失败
+  详细信息: 'Series' object has no attribute 'isfinite'
+
+================================================================================
