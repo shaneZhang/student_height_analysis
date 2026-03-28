@@ -82,6 +82,9 @@ class DataManager:
         if backup_name is None:
             backup_name = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
 
+        # 确保备份目录存在
+        os.makedirs(self.backup_dir, exist_ok=True)
+
         backup_path = os.path.join(self.backup_dir, backup_name)
         self.data_store.df.to_csv(backup_path, index=False)
         return backup_path
@@ -100,15 +103,27 @@ class DataManager:
             return False, f"备份文件 {backup_name} 不存在"
 
         try:
+            # 尝试读取备份文件以验证其有效性
+            df = pd.read_csv(backup_path)
+
+            # 验证必要列
+            required_columns = ['student_id', 'name', 'gender', 'grade', 'class', 'height', 'measure_date']
+            missing_columns = [col for col in required_columns if col not in df.columns]
+            if missing_columns:
+                return False, f"备份文件缺少必要列: {missing_columns}"
+
             # 先备份当前数据
             self.backup_data(f"auto_backup_before_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
 
             # 恢复数据
-            df = pd.read_csv(backup_path)
             self.data_store.df = df
             self.data_store.save_data()
 
             return True, f"已从备份 {backup_name} 恢复数据"
+        except pd.errors.EmptyDataError:
+            return False, "备份文件为空"
+        except pd.errors.ParserError:
+            return False, "备份文件格式错误"
         except Exception as e:
             return False, f"恢复失败: {str(e)}"
 
