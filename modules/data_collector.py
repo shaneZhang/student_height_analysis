@@ -38,7 +38,16 @@ class DataValidator:
             errors.append(f"身高必须在{cls.MIN_HEIGHT}cm到{cls.MAX_HEIGHT}cm之间")
 
         try:
-            datetime.strptime(student.measure_date, '%Y-%m-%d')
+            measure_date = datetime.strptime(student.measure_date, '%Y-%m-%d')
+            today = datetime.now()
+
+            # 检查未来日期
+            if measure_date > today:
+                errors.append("测量日期不能是未来日期")
+
+            # 检查极早日期（早于2000年）
+            if measure_date.year < 2000:
+                errors.append("测量日期不能早于2000年")
         except ValueError:
             errors.append("测量日期格式错误，应为YYYY-MM-DD")
 

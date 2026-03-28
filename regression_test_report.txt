@@ -1,0 +1,123 @@
+================================================================================
+学生身高分析系统 - 全量回归测试报告
+================================================================================
+
+测试时间: 2026-03-28 16:42:11
+总测试数: 54
+通过: 54
+失败: 0
+通过率: 100.0%
+
+================================================================================
+详细测试结果
+================================================================================
+
+[1] ✓ PASS: Student类创建
+
+[2] ✓ PASS: Student.to_dict
+
+[3] ✓ PASS: Student.from_dict
+
+[4] ✓ PASS: DataStore初始化
+
+[5] ✓ PASS: DataStore.add_student
+
+[6] ✓ PASS: DataStore.add_student重复检测
+
+[7] ✓ PASS: DataStore.get_student
+
+[8] ✓ PASS: DataStore.update_student
+
+[9] ✓ PASS: DataStore.delete_student
+
+[10] ✓ PASS: DataStore.query
+
+[11] ✓ PASS: DataStore.clear_data
+
+[12] ✓ PASS: DataStore.import_from_dataframe
+
+[13] ✓ PASS: DataStore.import_from_dataframe重复检测
+
+[14] ✓ PASS: DataValidator.validate_student有效数据
+
+[15] ✓ PASS: DataValidator.validate_student无效性别
+
+[16] ✓ PASS: DataValidator.validate_student无效年级
+
+[17] ✓ PASS: DataValidator.validate_student无效身高
+
+[18] ✓ PASS: DataValidator.validate_student未来日期
+
+[19] ✓ PASS: DataValidator.validate_student极早日期
+
+[20] ✓ PASS: DataCollector.add_student_manual
+
+[21] ✓ PASS: DataCollector.check_duplicate_ids
+
+[22] ✓ PASS: DataCollector.get_import_template
+
+[23] ✓ PASS: HeightStatistics.basic_statistics
+
+[24] ✓ PASS: HeightStatistics.distribution_by_intervals
+
+[25] ✓ PASS: HeightStatistics.group_by_gender
+
+[26] ✓ PASS: HeightStatistics.group_by_grade
+
+[27] ✓ PASS: HeightStatistics.cross_group_analysis
+
+[28] ✓ PASS: HeightStatistics.trend_analysis
+
+[29] ✓ PASS: HeightStatistics.gender_difference_analysis
+
+[30] ✓ PASS: HeightStatistics.compare_with_national
+
+[31] ✓ PASS: HeightStatistics.outliers_analysis
+
+[32] ✓ PASS: HeightStatistics.Infinity值过滤
+
+[33] ✓ PASS: DataManager.query_by_student_id
+
+[34] ✓ PASS: DataManager.query_by_name
+
+[35] ✓ PASS: DataManager.query_by_name正则特殊字符
+
+[36] ✓ PASS: DataManager.query_by_filters
+
+[37] ✓ PASS: DataManager.update_student_info
+
+[38] ✓ PASS: DataManager.delete_student
+
+[39] ✓ PASS: DataManager.backup_data
+
+[40] ✓ PASS: DataManager.backup_data自动创建目录
+
+[41] ✓ PASS: DataManager.restore_from_backup
+
+[42] ✓ PASS: DataManager.restore_from_backup损坏文件
+
+[43] ✓ PASS: DataManager.export_data
+
+[44] ✓ PASS: DataManager.get_statistics_summary
+
+[45] ✓ PASS: DataManager.validate_data_integrity
+
+[46] ✓ PASS: HeightVisualizer.plot_height_distribution_histogram
+
+[47] ✓ PASS: HeightVisualizer.plot_gender_comparison_boxplot
+
+[48] ✓ PASS: HeightVisualizer.plot_grade_trend
+
+[49] ✓ PASS: HeightVisualizer.plot_height_distribution_pie
+
+[50] ✓ PASS: HeightVisualizer.plot_gender_grade_heatmap
+
+[51] ✓ PASS: HeightVisualizer.plot_class_comparison
+
+[52] ✓ PASS: HeightVisualizer.plot_national_comparison
+
+[53] ✓ PASS: HeightVisualizer.generate_all_visualizations
+
+[54] ✓ PASS: 并发添加数据
+
+================================================================================
